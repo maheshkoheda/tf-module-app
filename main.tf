@@ -56,6 +56,7 @@ resource "aws_autoscaling_group" "main" {
   desired_capacity   = var.desired_capacity
   max_size           = var.max_size
   min_size           = var.min_size
+  target_group_arns  = [aws_lb_target_group.main.arn]
 
   launch_template {
     id      = aws_launch_template.main.id
@@ -84,4 +85,21 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_lb_listener_rule" "main" {
+  listener_arn = var.listener
+  priority     = var.lb_priority
+
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
+      }
+
+
+  condition {
+    host_header {
+      values = ["${var.component}-${var.env}.maheshkoheda5.online"]
+    }
+  }
 }
